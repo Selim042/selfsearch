@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Settings - Homelab Unified Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-indigo-400">Service Settings</h1>
+                <p class="text-sm text-slate-400">Manage external service URLs, API credentials, and active search targets.</p>
+            </div>
+            <a href="/" class="text-xs text-indigo-300 hover:text-indigo-200 border border-indigo-500/30 px-3 py-1.5 rounded bg-indigo-950/20 transition">
+                ← Back to Search
+            </a>
+        </div>
+
+        <!-- Success Notification -->
+        <div th:if="${param.saved}" class="mb-6 p-4 bg-emerald-950/50 border border-emerald-700/60 text-emerald-200 text-sm rounded-lg flex items-center justify-between">
+            <span>Settings updated successfully!</span>
+        </div>
+
+        <!-- Settings Form -->
+        <form th:action="@{/settings}" th:object="${userSettings}" method="post" class="space-y-6">
+            <div th:each="service : ${userSettings.services}" 
+                 class="p-6 bg-slate-800/80 border border-slate-700/80 rounded-xl space-y-4 shadow-lg">
+                
+                <!-- Service Title & Enable Toggle -->
+                <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+                    <h2 class="text-lg font-semibold text-indigo-300" th:text="${service.key}">Service Name</h2>
+                    <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none">
+                        <input type="checkbox" 
+                               th:field="*{services['__${service.key}__'].enabled}" 
+                               class="w-4 h-4 rounded bg-slate-900 border-slate-600 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-800">
+                        <span>Enable Search Target</span>
+                    </label>
+                </div>
+
+                <!-- Hidden Service Name Field -->
+                <input type="hidden" th:field="*{services['__${service.key}__'].serviceName}" />
+
+                <div th:if="${service.value.authType.fieldCount} > 0">
+                    <!-- Service Inputs Grid (Dynamic Columns: 3 cols if username required, 2 cols otherwise) -->
+                    <div class="grid grid-cols-1 gap-4" 
+                         th:classappend="${service.value.authType.fieldCount == 2} ? 'md:grid-cols-3' : 'md:grid-cols-2'">
+                         
+                        <!-- Base URL -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Base URL</label>
+                            <input type="url" 
+                                   placeholder="http://192.168.1.100:8080"
+                                   th:field="*{services['__${service.key}__'].url}" 
+                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 transition"/>
+                        </div>
+
+                        <div th:if="${service.value.authType.name() == 'USER_AND_PASS'}">
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Username</label>
+                            <input type="text" 
+                                   placeholder="Username"
+                                   th:field="*{services['__${service.key}__'].serviceUsername}" 
+                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                                   autocomplete="off"/>
+                        </div>
+                        <div th:if="${service.value.authType.name() == 'USER_AND_PASS'}">
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Password / Token</label>
+                            <input type="password" 
+                                   th:field="*{services['__${service.key}__'].apiKey}" 
+                                   th:placeholder="${#strings.isEmpty(service.value.apiKey) ? 'Optional API Key' : '••••••••'}"
+                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                                   autocomplete="off"/>
+                        </div>
+
+                        <div th:if="${service.value.authType.name() == 'ID_AND_SECRET'}">
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Client ID</label>
+                            <input type="text" 
+                                   placeholder="Username"
+                                   th:field="*{services['__${service.key}__'].serviceUsername}" 
+                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                                   autocomplete="off"/>
+                        </div>
+                        <div th:if="${service.value.authType.name() == 'ID_AND_SECRET'}">
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Client Secret</label>
+                            <input type="password" 
+                                   th:field="*{services['__${service.key}__'].apiKey}" 
+                                   th:placeholder="${#strings.isEmpty(service.value.apiKey) ? 'Optional API Key' : '••••••••'}"
+                                   class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                                   autocomplete="off"/>
+                        </div>
+
+                        <div th:if="${service.value.authType.name() == 'API_KEY'}">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1">API Key / Token</label>
+                                <input type="password" 
+                                       th:field="*{services['__${service.key}__'].apiKey}" 
+                                       th:placeholder="${#strings.isEmpty(service.value.apiKey) ? 'Optional API Key' : '••••••••'}"
+                                       class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+                                       autocomplete="off"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end">
+                <button type="submit" 
+                        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm rounded-lg shadow-lg transition">
+                    Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
