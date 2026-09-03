@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <header class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-indigo-400">Self Search</h1>
+                <p class="text-sm text-slate-400">Logged in as: <span class="text-slate-200 font-semibold" th:text="${username}">User</span></p>
+            </div>
+            <!-- Header Action Buttons -->
+            <div class="flex items-center gap-2">
+                <a href="/settings" class="text-xs text-indigo-300 hover:text-indigo-200 border border-indigo-500/30 px-3 py-1.5 rounded bg-indigo-950/20 transition flex items-center gap-1">
+                    <span>Settings</span>
+                </a>
+                <a href="/logout" class="text-xs text-red-400 hover:text-red-300 border border-red-500/30 px-3 py-1.5 rounded bg-red-950/20 transition">Sign Out</a>
+            </div>
+        </header>
+        
+        <div th:if="${allowedServices}" class="mb-4 text-xs text-slate-500">
+            <span>Configured Search Targets: </span>
+            <div class="flex flex-wrap gap-2">
+                <div th:each="service : ${allowedServices}" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 bg-slate-800/60 text-slate-300 flex items-center gap-1.5">
+                    <span th:text="${service.key}"></span>
+                    <span th:text="${service.value == true ? '🔴' : '🟢'}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <form action="/search" method="get" class="flex gap-2 mb-8">
+            <input type="text" name="query" th:value="${query}" placeholder="Search local services or the web..." 
+                   class="flex-1 px-4 py-3 bg-slate-800 text-white rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" autofocus required/>
+            <button type="submit" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg">Search</button>
+        </form>
+
+        <main th:if="${localResults != null or webResults != null}">
+            <!-- SECTION 1: Local Homelab Apps (Top Priority) -->
+            <section class="mb-10">
+                <h2 class="text-xl font-bold text-indigo-300 mb-4 flex items-center gap-2">
+                    <span>🏠 Local Results</span>
+                    <span class="text-xs font-normal text-slate-400" th:text="'(' + ${localResults.size()} + ')'"></span>
+                </h2>
+
+                <div th:if="${localResults.empty}" class="p-4 bg-slate-800/50 rounded-lg text-slate-400 text-sm border border-slate-800">
+                    No local matches found.
+                </div>
+
+                <div class="space-y-3">
+                    <div th:each="item : ${localResults}" class="p-4 bg-slate-800 border border-slate-700 rounded-lg hover:border-slate-500 transition">
+                        <div class="flex items-start gap-4">
+                            <!-- Optional Result Thumbnail -->
+                            <div th:if="${item.imageUrl != null and not #strings.isEmpty(item.imageUrl)}" class="shrink-0">
+                                <img th:src="${item.imageUrl}" alt="Cover art" class="w-16 h-20 object-cover rounded-md border border-slate-700 bg-slate-900" referrerpolicy="no-referrer" loading="lazy" />
+                            </div>
+
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-700" th:text="${item.sourceService.getServiceName()}">Service</span>
+                                    <span class="text-xs text-slate-400 font-mono" th:text="${item.category}">Category</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-white">
+                                    <a th:href="${item.url}" target="_blank" class="hover:underline hover:text-indigo-400" th:text="${item.title}">Result Title</a>
+                                </h3>
+                                <p class="text-sm text-slate-300 mt-1" th:utext="${item.description}">Description snippet...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: SearXNG Web Results (Second Priority) -->
+            <section th:if="${webResults != null and not webResults.empty}" class="border-t border-slate-800 pt-8">
+                <h2 class="text-xl font-bold text-slate-300 mb-4 flex items-center gap-2">
+                    <span>🌐 Web Results</span>
+                    <span class="text-xs font-normal text-slate-400" th:text="'(' + ${webResults.size()} + ')'"></span>
+                </h2>
+
+                <div class="space-y-3">
+                    <div th:each="item : ${webResults}" class="p-4 bg-slate-800/60 border border-slate-800 rounded-lg hover:border-slate-600 transition">
+                        <div class="flex items-start gap-4">
+                            <!-- Optional Web Thumbnail -->
+                            <div th:if="${item.imageUrl != null and not #strings.isEmpty(item.imageUrl)}" class="shrink-0">
+                                <img th:src="${item.imageUrl}" alt="Thumbnail" class="w-16 h-16 object-cover rounded-md border border-slate-700/60 bg-slate-900" loading="lazy" />
+                            </div>
+
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-700" th:text="${item.sourceService.getServiceName()}">Service</span>
+                                    <span class="text-xs font-mono text-emerald-400" th:text="${item.category}">Engine</span>
+                                </div>
+                                <h3 class="text-base font-semibold text-indigo-200">
+                                    <a th:href="${item.url}" target="_blank" class="hover:underline" th:text="${item.title}">Web Result Title</a>
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-1 line-clamp-2" th:utext="${item.description}">Snippet...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
