@@ -20,17 +20,17 @@ Features:
 Docker compose:
 ```yaml
 services:
-  unified-search:
-    build: .
-    container_name: unified-search
+  self-search:
+    image: ghcr.io/selim042/selfsearch:master
+    container_name: self-search
     ports:
         - "8080:8080"
     volumes:
         - ./data:/app/data
     environment:
-        - OIDC_CLIENT_ID=3hd31qLKB8O9agTgh1GviGbLfiMoAcVLeIOULgeh
-        - OIDC_CLIENT_SECRET=y4JhRrkWnM2y59g7G10YC1c358cDtXCfHElUNcv5btNVEMKIvHzFNB5A1RtJaEQxRT0UgxR0frhDRLoUxGw44K2DFHj1OB0NChCt7Iy7d2S9hrpezaE0dWlX0spIc1Ga
-        - OIDC_ISSUER_URI=https://auth.emly.dev/application/o/unified-search/
+        - OIDC_CLIENT_ID=client_id
+        - OIDC_CLIENT_SECRET=client_secret
+        - OIDC_ISSUER_URI=https://auth.example.com/application/o/unified-search/
     restart: unless-stopped
 ```
 
