@@ -16,6 +16,8 @@ Features:
 - In-browser configuration for services
 - List of services above search shows if there was an error
 
+PRs and suggestions for additional search services welcome.
+
 ## Get Started
 Docker compose:
 ```yaml
