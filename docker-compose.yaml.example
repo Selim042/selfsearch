@@ -1,6 +1,6 @@
 services:
   self-search:
-    build: .
+    image: ghcr.io/selim042/selfsearch:master
     container_name: self-search
     ports:
         - "8080:8080"
