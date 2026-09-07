@@ -27,6 +27,7 @@ public class UserServiceSetting {
 
 	private String serviceUsername;
 
+	@Column(length = 512)
 	private String apiKey;
 
 	@Column(nullable = false)
