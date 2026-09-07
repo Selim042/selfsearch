@@ -9,6 +9,7 @@ Supported:
 - BookStack
 - Audiobookshelf
 - DuckDuckGo
+- Mealie
 
 Features:
 - OIDC authentication
